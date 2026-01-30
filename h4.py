@@ -1,4 +1,4 @@
-# Hypothesis 04: Cost Worry vs Adoption
+# Hypothesis 04: (Cost Worry vs Adoption) High concern regarding implementation costs is negatively correlated with adoption intent.
 
 from dataframe import df, readiness_score
 import scipy.stats as stats

@@ -1,4 +1,4 @@
-# Hypothesis 03: Biggest Barrier
+# Hypothesis 03: (Biggest Barrier) Cost is the most significant barrier to adoption among suppliers.
 
 from dataframe import df
 

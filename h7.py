@@ -1,4 +1,4 @@
-# Digital experience vs timeline
+# Hypotheis 07: (Digital experience vs timeline) Companies with prior digital transformation experience are more likely to have a defined timeline for adoption.
 
 from dataframe import df
 import scipy.stats as stats

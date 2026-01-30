@@ -1,4 +1,4 @@
-# Having top management support leads to higher readiness.
+# Hypothesis 02: Top management support has a positive correlation with DPP readiness.
 
 from dataframe import df, mgmt_support_score, readiness_score
 import scipy.stats as stats
