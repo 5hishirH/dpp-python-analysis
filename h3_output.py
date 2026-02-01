@@ -1,53 +1,51 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from dataframe import df
+from prep import df
 
-# --- 1. SETUP DATA ---
-# precise mapping based on Section 7 of your survey
-barrier_names = {
-    'G1': 'Cost of Implementation (Q25)',
-    'G2': 'Lack of Industry Standards (Q26)',
-    'G3': 'Interoperability Issues (Q27)',
-    'G4': 'Lack of Skilled Personnel (Q28)',
-    'G5': 'Regulatory Uncertainty (Q29)'
-}
+# --- 1. PREPARE DATA ---
+# Create a new column to label the groups explicitly
+# This makes plotting and grouping much easier
+df['Experience_Group'] = df['B7'].apply(lambda x: 'High Experience (>=4)' if x >= 4 else 'Low Experience (<4)')
 
-# Select columns and calculate means
-barriers = df[['G1', 'G2', 'G3', 'G4', 'G5']]
-barrier_means = barriers.mean().sort_values(ascending=False).reset_index()
-barrier_means.columns = ['Code', 'Mean_Score']
+# Define the variable we are measuring (D2: Ready_Milestones)
+timeline_var = 'D2' 
 
-# Map the codes to real names for the display
-barrier_means['Barrier_Name'] = barrier_means['Code'].map(barrier_names)
+# --- 2. GENERATE TABLE 3 (Group Statistics) ---
+# We need Count (N), Mean, and Std Dev
+group_stats = df.groupby('Experience_Group')[timeline_var].agg(['count', 'mean', 'std']).reset_index()
 
-# --- 2. GENERATE TABLE 4 (Excel) ---
-output_excel = 'H5_Barrier_Ranking.xlsx'
-barrier_means[['Barrier_Name', 'Mean_Score']].to_excel(output_excel, index=False)
+# Rename for Academic Presentation
+group_stats.columns = ['Group', 'N', 'Mean', 'Std. Deviation']
+
+# Calculate Standard Error Mean (often required for Table 3)
+group_stats['Std. Error Mean'] = group_stats['Std. Deviation'] / (group_stats['N'] ** 0.5)
+
+# Export to Excel
+output_excel = 'H3_Group_Statistics.xlsx'
+group_stats.to_excel(output_excel, index=False)
 print(f"Table saved to {output_excel}")
 
-# --- 3. GENERATE FIGURE (Horizontal Bar Chart) ---
+# --- 3. GENERATE FIGURE (Bar Chart with Error Bars) ---
 sns.set_style("whitegrid")
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(8, 6))
 
+# Barplot automatically calculates the Mean (height of bar) and 95% Confidence Interval (error bar)
 ax = sns.barplot(
-    data=barrier_means,
-    x='Mean_Score',
-    y='Barrier_Name',
-    palette='viridis' 
+    data=df,
+    x='Experience_Group',
+    y=timeline_var,
+    capsize=0.1,             # Adds the little "caps" to the error bars
+    palette=['#e02a1f', '#2b7bba'], # Red and Blue colors
+    errorbar=('ci', 95)      # Show 95% Confidence Interval
 )
 
-# Add the specific numbers to the end of the bars
-for i in ax.containers:
-    ax.bar_label(i, fmt='%.2f', padding=5)
+plt.title('Comparison of Timeline Definition by Digital Experience', fontsize=14, fontweight='bold', pad=20)
+plt.xlabel('Digital Transformation Experience', fontsize=12)
+plt.ylabel('Defined Timeline Score (D2)', fontsize=12)
 
-plt.title('Ranking of Barriers to DPP Adoption', fontsize=14, fontweight='bold', pad=20)
-plt.xlabel('Mean Significance Score (1=Strongly Disagree, 5=Strongly Agree)', fontsize=12)
-plt.ylabel('Barrier Type', fontsize=12)
-plt.xlim(0, 5) 
-
-# Save image
-output_img = 'H5_Barrier_Ranking_Plot.png'
+# Save the image
+output_img = 'H3_Comparison_BarChart.png'
 plt.savefig(output_img, dpi=300, bbox_inches='tight')
 print(f"Figure saved to {output_img}")
 

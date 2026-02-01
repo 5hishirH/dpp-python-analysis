@@ -1,7 +1,6 @@
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from dataframe import df
+from prep import df
 
 # --- 1. PREPARE DATA ---
 # Create a new column to label the groups explicitly

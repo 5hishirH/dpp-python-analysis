@@ -1,62 +1,68 @@
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import statsmodels.api as sm
-from dataframe import df
+import matplotlib.pyplot as plt
+from prep import df
 
-# --- 1. RUN REGRESSION RECAP ---
-X = df['F3']
+# --- 1. RUN THE REGRESSION ---
+X = df[['D3', 'D2']]  # D3=Consumer, D2=Gov
 Y = df['Readiness_Score']
-X_with_const = sm.add_constant(X)
-model = sm.OLS(Y, X_with_const).fit()
+X = sm.add_constant(X) # Adds the intercept
 
-# --- 2. GENERATE TABLE (Excel) ---
-# Create a clean summary table
+model = sm.OLS(Y, X).fit()
+
+# --- 2. GENERATE TABLE 5 (Excel) ---
+# Extract the data from the model summary
+# We need: Coef, Std Err, t, P>|t|, [0.025, 0.975]
 results_summary = pd.DataFrame({
-    'Variable': ['Constant', 'Partner Readiness (F3)'],
-    'Coefficient': model.params.values,
+    'Variable': ['Constant', 'Consumer Demand (D3)', 'Govt Support (D2)'],
+    'Coefficient (B)': model.params.values,
     'Std. Error': model.bse.values,
     't-statistic': model.tvalues.values,
     'p-value': model.pvalues.values,
-    'R-Squared': [model.rsquared, model.rsquared] # Repeated just to fit the dataframe shape
+    'CI Lower (95%)': model.conf_int()[0].values,
+    'CI Upper (95%)': model.conf_int()[1].values
 })
 
-# Rounding
+# Round for cleaner Excel output
 results_summary = results_summary.round(4)
 
-# Save
-output_excel = 'H7_Regression_Results.xlsx'
+output_excel = 'H6_Regression_Results.xlsx'
 results_summary.to_excel(output_excel, index=False)
-print(f"Table saved to {output_excel}")
+print(f"Regression Table saved to {output_excel}")
 
-# --- 3. GENERATE FIGURE (Scatter Plot) ---
-sns.set_style("whitegrid")
-plt.figure(figsize=(10, 6))
+# --- 3. GENERATE FIGURE (Coefficient Plot) ---
+# We exclude the 'Constant' from the plot because it skews the scale
+plot_data = results_summary[results_summary['Variable'] != 'Constant']
 
-# Plot data points and regression line
-sns.regplot(
-    x=X, 
-    y=Y, 
-    scatter_kws={'alpha': 0.6, 'color': '#2b7bba'}, # Blue dots
-    line_kws={'color': '#e02a1f', 'linewidth': 2},  # Red line
-    ci=95
+plt.figure(figsize=(8, 5))
+
+# Plot the points (Coefficients) and Error Bars (Confidence Intervals)
+# yerr is calculated as: Coefficient - Lower_CI (or Upper_CI - Coefficient)
+errors = plot_data['Coefficient (B)'] - plot_data['CI Lower (95%)']
+
+plt.errorbar(
+    x=plot_data['Variable'], 
+    y=plot_data['Coefficient (B)'], 
+    yerr=errors, 
+    fmt='o',        # 'o' means plot as dots
+    color='black',  # Color of dots/lines
+    capsize=5,      # Width of the little caps on error bars
+    linewidth=2,
+    markersize=8
 )
 
-# Add R-squared annotation to the graph
-plt.text(
-    x=X.min(), 
-    y=Y.max(), 
-    s=f'$R^2 = {model.rsquared:.2f}$', 
-    fontsize=12, 
-    bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray')
-)
+# Add a reference line at 0 (if interval crosses 0, it's not significant)
+plt.axhline(y=0, color='gray', linestyle='--', linewidth=1)
 
-plt.title('Impact of Supply Chain Partner Readiness on Org Readiness', fontsize=14, fontweight='bold', pad=20)
-plt.xlabel('Partner Readiness Score (F3)', fontsize=12)
-plt.ylabel('Organizational Readiness Score', fontsize=12)
+plt.title('Comparison of Regression Coefficients (Influence Strength)', fontsize=12, fontweight='bold', pad=15)
+plt.ylabel('Impact on Readiness (Coefficient)', fontsize=10)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 
-# Save image
-output_img = 'H7_Regression_Plot.png'
+# Annotate the values next to the dots
+for i, txt in enumerate(plot_data['Coefficient (B)']):
+    plt.annotate(f"{txt:.3f}", (i, txt), xytext=(10, 0), textcoords='offset points')
+
+output_img = 'H6_Coefficient_Plot.png'
 plt.savefig(output_img, dpi=300, bbox_inches='tight')
 print(f"Figure saved to {output_img}")
 

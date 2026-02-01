@@ -1,6 +1,6 @@
 # Hypothesis 01: Company sizes do not affect the readiness of DPP
 
-from dataframe import df
+from prep import df
 import scipy.stats as stats
 
 # print(df["Company_Name"].head()) # check unique values in company size

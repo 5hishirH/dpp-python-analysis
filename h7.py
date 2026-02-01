@@ -1,14 +1,26 @@
-# Hypotheis 07: (Digital experience vs timeline) Companies with prior digital transformation experience are more likely to have a defined timeline for adoption.
+# Hypothesis 07: Organizational readiness is positively moderated by the readiness of supply chain partners.
 
-from dataframe import df
-import scipy.stats as stats
+from prep import df
+import statsmodels.api as sm
 
-# D2: Ready_Milestones
-# B7: Digital_Exp
+# 1. Define your variables
+# Y = The calculated average of all Readiness questions (Q18-Q24)
+Y = df['Readiness_Score'] 
 
-high_exp = df[df['B7'] >= 4]['D2']
-low_exp = df[df['B7'] < 4]['D2']
+# X = The specific question about partners (Q20)
+X = df['F3'] 
 
-# T-Test
-t_stat, p_val = stats.ttest_ind(high_exp, low_exp)
-print(f"H7 (Exp vs Timeline): T-stat={t_stat:.2f}, p-value={p_val:.4f}")
+# 2. Run Linear Regression
+# Add a constant (intercept) because regression needs a starting point
+X = sm.add_constant(X) 
+
+model = sm.OLS(Y, X).fit()
+
+# 3. Print the results
+print(model.summary())
+
+# INTERPRETATION:
+# Look at the 'P>|t|' column for 'Ready_Partners'.
+# If p < 0.05, it means Partner Readiness significantly impacts your readiness.
+# Look at 'Coef': If it is positive (e.g., 0.4), then for every 1 point increase 
+# in partner readiness, your readiness goes up by 0.4 points.

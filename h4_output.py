@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-from dataframe import df
+from prep import df
 
 # --- Configuration ---
 # Set the visual style

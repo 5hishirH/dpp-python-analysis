@@ -1,68 +1,52 @@
-import pandas as pd
-import statsmodels.api as sm
+import seaborn as sns
 import matplotlib.pyplot as plt
-from dataframe import df
+from prep import df
 
-# --- 1. RUN THE REGRESSION ---
-X = df[['D3', 'D2']]  # D3=Consumer, D2=Gov
-Y = df['Readiness_Score']
-X = sm.add_constant(X) # Adds the intercept
+# --- 1. SETUP DATA ---
+# precise mapping based on Section 7 of your survey
+barrier_names = {
+    'G1': 'Cost of Implementation (Q25)',
+    'G2': 'Lack of Industry Standards (Q26)',
+    'G3': 'Interoperability Issues (Q27)',
+    'G4': 'Lack of Skilled Personnel (Q28)',
+    'G5': 'Regulatory Uncertainty (Q29)'
+}
 
-model = sm.OLS(Y, X).fit()
+# Select columns and calculate means
+barriers = df[['G1', 'G2', 'G3', 'G4', 'G5']]
+barrier_means = barriers.mean().sort_values(ascending=False).reset_index()
+barrier_means.columns = ['Code', 'Mean_Score']
 
-# --- 2. GENERATE TABLE 5 (Excel) ---
-# Extract the data from the model summary
-# We need: Coef, Std Err, t, P>|t|, [0.025, 0.975]
-results_summary = pd.DataFrame({
-    'Variable': ['Constant', 'Consumer Demand (D3)', 'Govt Support (D2)'],
-    'Coefficient (B)': model.params.values,
-    'Std. Error': model.bse.values,
-    't-statistic': model.tvalues.values,
-    'p-value': model.pvalues.values,
-    'CI Lower (95%)': model.conf_int()[0].values,
-    'CI Upper (95%)': model.conf_int()[1].values
-})
+# Map the codes to real names for the display
+barrier_means['Barrier_Name'] = barrier_means['Code'].map(barrier_names)
 
-# Round for cleaner Excel output
-results_summary = results_summary.round(4)
+# --- 2. GENERATE TABLE 4 (Excel) ---
+output_excel = 'H5_Barrier_Ranking.xlsx'
+barrier_means[['Barrier_Name', 'Mean_Score']].to_excel(output_excel, index=False)
+print(f"Table saved to {output_excel}")
 
-output_excel = 'H6_Regression_Results.xlsx'
-results_summary.to_excel(output_excel, index=False)
-print(f"Regression Table saved to {output_excel}")
+# --- 3. GENERATE FIGURE (Horizontal Bar Chart) ---
+sns.set_style("whitegrid")
+plt.figure(figsize=(10, 6))
 
-# --- 3. GENERATE FIGURE (Coefficient Plot) ---
-# We exclude the 'Constant' from the plot because it skews the scale
-plot_data = results_summary[results_summary['Variable'] != 'Constant']
-
-plt.figure(figsize=(8, 5))
-
-# Plot the points (Coefficients) and Error Bars (Confidence Intervals)
-# yerr is calculated as: Coefficient - Lower_CI (or Upper_CI - Coefficient)
-errors = plot_data['Coefficient (B)'] - plot_data['CI Lower (95%)']
-
-plt.errorbar(
-    x=plot_data['Variable'], 
-    y=plot_data['Coefficient (B)'], 
-    yerr=errors, 
-    fmt='o',        # 'o' means plot as dots
-    color='black',  # Color of dots/lines
-    capsize=5,      # Width of the little caps on error bars
-    linewidth=2,
-    markersize=8
+ax = sns.barplot(
+    data=barrier_means,
+    x='Mean_Score',
+    y='Barrier_Name',
+    palette='viridis' 
 )
 
-# Add a reference line at 0 (if interval crosses 0, it's not significant)
-plt.axhline(y=0, color='gray', linestyle='--', linewidth=1)
+# Add the specific numbers to the end of the bars
+for i in ax.containers:
+    ax.bar_label(i, fmt='%.2f', padding=5)
 
-plt.title('Comparison of Regression Coefficients (Influence Strength)', fontsize=12, fontweight='bold', pad=15)
-plt.ylabel('Impact on Readiness (Coefficient)', fontsize=10)
-plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.title('Ranking of Barriers to DPP Adoption', fontsize=14, fontweight='bold', pad=20)
+plt.xlabel('Mean Significance Score (1=Strongly Disagree, 5=Strongly Agree)', fontsize=12)
+plt.ylabel('Barrier Type', fontsize=12)
+plt.xlim(0, 5) 
 
-# Annotate the values next to the dots
-for i, txt in enumerate(plot_data['Coefficient (B)']):
-    plt.annotate(f"{txt:.3f}", (i, txt), xytext=(10, 0), textcoords='offset points')
-
-output_img = 'H6_Coefficient_Plot.png'
+# Save image
+output_img = 'H5_Barrier_Ranking_Plot.png'
 plt.savefig(output_img, dpi=300, bbox_inches='tight')
 print(f"Figure saved to {output_img}")
 

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-from dataframe import df, mgmt_support_score, readiness_score
+from prep import df, mgmt_support_score, readiness_score
 
 # --- Configuration ---
 # Set the visual style for academic publication

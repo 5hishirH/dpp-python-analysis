@@ -1,11 +1,14 @@
-# Hypothesis 05: (Biggest Barrier) Cost is the most significant barrier to adoption among suppliers.
+# Hypotheis 07: (Digital experience vs timeline) Companies with prior digital transformation experience are more likely to have a defined timeline for adoption.
 
-from dataframe import df
+from prep import df
+import scipy.stats as stats
 
-barriers = df[['G1', 'G2', 'G3', 'G4', 'G5']]
+# D2: Ready_Milestones
+# B7: Digital_Exp
 
-# Calculate mean for each column and sort
-barrier_means = barriers.mean().sort_values(ascending=False)
+high_exp = df[df['B7'] >= 4]['D2']
+low_exp = df[df['B7'] < 4]['D2']
 
-print("Ranking of Barriers (Highest = Biggest Problem):")
-print(barrier_means)
+# T-Test
+t_stat, p_val = stats.ttest_ind(high_exp, low_exp)
+print(f"H7 (Exp vs Timeline): T-stat={t_stat:.2f}, p-value={p_val:.4f}")

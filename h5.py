@@ -1,20 +1,11 @@
-# Hypothesis 06: Consumer demand for transparency influences readiness more strongly than government support.
+# Hypothesis 05: (Biggest Barrier) Cost is the most significant barrier to adoption among suppliers.
 
+from prep import df
 
-from dataframe import df
-import statsmodels.api as sm
+barriers = df[['G1', 'G2', 'G3', 'G4', 'G5']]
 
-# D2: Gov_Support
-# D3: Consumer_Demand
-X = df[['D3', 'D2']]
-Y = df['Readiness_Score']
+# Calculate mean for each column and sort
+barrier_means = barriers.mean().sort_values(ascending=False)
 
-X = sm.add_constant(X)
-
-model = sm.OLS(Y, X).fit()
-
-# Print summary to see Coefficients
-print(model.summary())
-
-# Look at the 'coef' column in the output:
-# If Consumer_Demand (D3) coef > Gov_Support (D2) coef, your hypothesis is supported.
+print("Ranking of Barriers (Highest = Biggest Problem):")
+print(barrier_means)

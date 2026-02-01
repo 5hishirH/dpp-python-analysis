@@ -1,9 +1,20 @@
-# Hypothesis 04: (Cost Worry vs Adoption) High concern regarding implementation costs is negatively correlated with adoption intent.
+# Hypothesis 04: Regulatory awareness is positively correlated with budget allocation for digital initiatives.
 
-from dataframe import df, readiness_score
+from prep import df
+
 import scipy.stats as stats
 
-# G1: Barrier_Cost
+# E1: Awareness_regs
+# C1: Mgmt_Budget
+awareness = df['E1']    # Q15
+budget = df['C1']   # Q8
 
-corr_h4, p_h4 = stats.pearsonr(df['G1'], df[readiness_score])
-print(f"H4 (Cost vs Ready): Correlation={corr_h4:.2f}, p-value={p_h4:.4f}")
+corr, p_value = stats.spearmanr(awareness, budget)
+
+print(f"H8 Correlation Coefficient: {corr:.3f}")
+print(f"H8 P-value: {p_value:.5f}")
+
+# INTERPRETATION:
+# If p_value < 0.05: The relationship is real (statistically significant).
+# If corr is positive (e.g., +0.6): High Awareness = High Budget.
+# If corr is near 0: Knowing the rules doesn't make them spend money.

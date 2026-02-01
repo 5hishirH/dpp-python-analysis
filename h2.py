@@ -1,6 +1,6 @@
 # Hypothesis 02: Top management support has a positive correlation with DPP readiness.
 
-from dataframe import df, mgmt_support_score, readiness_score
+from prep import df, mgmt_support_score, readiness_score
 import scipy.stats as stats
 
 corr_h2, p_h2 = stats.pearsonr(df[mgmt_support_score], df[readiness_score])

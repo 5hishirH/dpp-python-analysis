@@ -1,7 +1,7 @@
 import pandas as pd
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
-from dataframe import df, readiness_score
+from prep import df, readiness_score
 
 # --- CONFIGURATION ---
 # Define the groups you are comparing (as per your H1)
