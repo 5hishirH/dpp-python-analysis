@@ -1,4 +1,4 @@
-# Hypothesis 01: Large companies are more ready for DPP than small companies.
+# Hypothesis 01: Company sizes do not affect the readiness of DPP
 
 from dataframe import df
 import scipy.stats as stats

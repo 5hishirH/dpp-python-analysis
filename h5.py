@@ -1,4 +1,5 @@
-# Hypothesis 05: Consumer demand for transparency influences readiness more strongly than government support.
+# Hypothesis 06: Consumer demand for transparency influences readiness more strongly than government support.
+
 
 from dataframe import df
 import statsmodels.api as sm

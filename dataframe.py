@@ -3,7 +3,8 @@ import pandas as pd
 
 gc = gspread.service_account(filename='service_account.json')
 
-sh = gc.open("Digital Product Passport (Responses)")
+# "Digital Product Passport (Responses)"
+sh = gc.open("re-dpp")
 
 # select by index (0 is the first sheet) or name
 worksheet = sh.get_worksheet(0) 
